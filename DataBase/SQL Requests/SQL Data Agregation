@@ -1,0 +1,347 @@
+Выбор уникальных элементов столбца
+
+
+Синтаксис оператора DISTINCT:
+
+SELECT DISTINCT column_name FROM table_name; 
+
+
+Теперь выполним запрос с оператором DISTINCT для выбора уникальных значений столбца "airport_code":
+
+SELECT DISTINCT airport_code
+FROM airports;
+
+
+Запрос с оператором DISTINCT для выбора уникальных комбинаций "departure_airport" и "arrival_airport":
+
+SELECT DISTINCT departure_airport, arrival_airport
+FROM flights;
+
+
+
+
+Оператор DISTINCT ON
+
+
+Оператор DISTINCT ON используется следующим образом:
+
+SELECT DISTINCT ON (column_name) column_name, other_column1, other_column2, ...
+FROM table_name;
+
+
+Вернемся к примеру с таблицей "flights" и применим оператор DISTINCT ON:
+
+SELECT DISTINCT ON (departure_airport) departure_airport, arrival_airport
+FROM flights;
+
+
+
+
+
+
+Агрегатные функции SUM и COUNT для группировки данных.
+
+
+
+SUM:
+
+
+Запрос с оператором SUM для вычисления общей суммы стоимости бронирований:
+
+SELECT SUM(total_amount) AS total_sum FROM bookings; 
+
+
+
+COUNT:
+
+
+Запрос с оператором COUNT для подсчета общего числа бронирований:
+
+SELECT COUNT(*) AS total_bookings FROM bookings; 
+
+
+
+Агрегатные функции MIN, MAX и AVG
+
+
+MIN
+
+
+Запрос с оператором MIN для нахождения минимальной дальности полета:
+
+SELECT MIN(range) AS min_range FROM aircrafts; 
+
+
+MAX
+
+
+Запрос с оператором MAX для нахождения максимальной дальности полета:
+
+SELECT MAX(range) AS max_range FROM aircrafts; 
+
+
+AVG
+
+
+Запрос с оператором AVG для нахождения средней дальности полета:
+
+SELECT AVG(range) AS avg_range FROM aircrafts; 
+
+
+
+
+Агрегация данных с использованием GROUP BY
+
+
+Синтаксис оператора GROUP BY:
+
+Оператор GROUP BY применяется в выражении SELECT и имеет следующий синтаксис:
+
+SELECT column1, column2, aggregate_function(column3)
+FROM table_name
+GROUP BY column1, column2;
+
+
+
+Запрос с оператором GROUP BY для подсчета количества рейсов по аэропортам отправления:
+
+SELECT departure_airport, COUNT(*) AS flight_count 
+FROM flights 
+GROUP BY departure_airport; 
+
+
+
+Запрос с оператором GROUP BY для подсчета общего количества рейсов между 
+каждой комбинацией аэропортов отправления и прибытия:
+
+SELECT departure_airport, arrival_airport, COUNT(*) AS flight_count 
+FROM flights 
+GROUP BY departure_airport, arrival_airport; 
+
+
+
+Запрос с оператором GROUP BY для вычисления средней, суммарной и минимальной 
+дальности полета для каждой модели самолета:
+
+SELECT 
+    model,
+    AVG(range) AS average_range,
+    SUM(range) AS total_range,
+    MIN(range) AS min_range
+FROM aircrafts
+GROUP BY model;
+
+
+
+
+
+Выборка данных с вычислением групповых функций
+
+
+Найдем среднюю стоимость перелетов для каждого класса 
+обслуживания (fare_conditions) в таблице "ticket_flights", 
+округленную до двух знаков после запятой.
+
+SELECT fare_conditions, ROUND(AVG(amount), 2) AS average_ticket_price
+FROM ticket_flights
+GROUP BY fare_conditions; 
+
+
+Найдем общую стоимость билетов для каждого рейса в таблице "ticket_flights"
+ с учетом скидки (discount) на перелеты.
+
+SELECT flight_id, SUM(amount * (1 - discount)) AS total_cost_with_discount
+-- (например в discount напишем 0.90, то скидка будет 90%)) 
+FROM ticket_flights 
+GROUP BY flight_id; 
+
+
+
+
+Фильтрация групп с использованием HAVING
+
+
+Синтаксис оператора HAVING выглядит следующим образом:
+
+SELECT column1, column2, aggregate_function(column3) 
+FROM table_name 
+GROUP BY column1, column2
+HAVING condition; 
+
+
+
+Теперь давай выполним запрос:
+
+SELECT aircraft_code, MAX(range) AS max_range
+FROM aircrafts
+GROUP BY aircraft_code
+HAVING max(range) > 5000; 
+
+
+
+
+
+Совместное использование операторов WHERE и HAVING
+
+
+
+Предположим, у нас есть таблица "flights" с информацией о рейсах, 
+и мы хотим выбрать аэропорты отправления, у которых запланировано 
+более 100 рейсов со статусом 'Scheduled'.
+
+SELECT departure_airport, COUNT(*) AS total_flights
+FROM flights
+WHERE status = 'Scheduled'
+GROUP BY departure_airport
+HAVING COUNT(*) > 100;
+
+
+
+
+
+Найдите общее количество выполненных рейсов, используя таблицу "flights" и функцию COUNT.
+
+SELECT COUNT(*) FROM flights; 
+
+
+Найдите количество уникальных моделей самолетов, участвовавших в рейсах, используя функцию COUNT и DISTINCT.
+
+SELECT  COUNT( distinct aircraft_code) FROM flights; 
+
+
+Найдите среднюю дальность полета самолетов, используя функцию AVG и GROUP BY для каждой модели самолета.
+
+SELECT 
+    model,
+    AVG(range) AS average_range
+FROM aircrafts
+GROUP BY model;
+
+
+Посчитайте общую стоимость всех бронирований из таблицы "bookings", используя функцию SUM.
+
+SELECT SUM(total_amount) FROM bookings; 
+
+
+Посчитайте общее количество проданных билетов на рейсы из таблицы "ticket_flights" с помощью функции COUNT.
+
+SELECT COUNT(ticket_no) FROM ticket_flights;
+
+
+Найдите среднюю стоимость перелета по каждому классу обслуживания (fare_conditions) 
+с использованием GROUP BY и AVG.
+
+SELECT 
+    fare_conditions,
+    AVG(amount)
+FROM Ticket_flights
+GROUP BY fare_conditions; 
+
+
+ Найдите топ-5 направлений с наибольшим числом выполненных рейсов, используя GROUP BY, COUNT и сортировку.
+
+SELECT 
+    arrival_airport,
+    COUNT(*) as countt
+FROM Flights
+GROUP BY arrival_airport
+order by countt desc
+limit 5; 
+
+
+Найдите аэропорт с самым большим количеством прибывающих рейсов, используя GROUP BY и COUNT.
+
+SELECT 
+    flight_no,
+    COUNT(arrival_airport) as countt
+FROM Flights
+GROUP BY flight_no
+order by countt desc
+limit 1; 
+
+
+Найдите самый длинный и самый короткий рейс (в километрах) среди выполненных рейсов,
+ используя функции MAX и MIN.
+
+SELECT 
+    MAX(range) AS maxx,
+    MIN(range) AS minn
+FROM aircrafts;
+
+
+Найдите модель самолета с наибольшей дальностью полета, используя функции MAX, MIN и GROUP BY.
+
+SELECT 
+    aircraft_code,
+    MAX(range) as maxx
+FROM aircrafts
+GROUP BY   aircraft_code
+order by maxx  desc
+limit 1; 
+
+
+Найдите модель самолета с наименьшей дальностью полета, используя функции MAX, MIN и GROUP BY.
+
+SELECT 
+    aircraft_code,
+     MIN(range) as minn
+FROM aircrafts
+GROUP BY   aircraft_code
+order by minn  desc
+limit 1; 
+
+
+Найдите все бронирования (номер бронирования и общее количество билетов), в которых число билетов больше 1.
+
+SELECT  book_ref, count(*)  AS ticket_noo
+FROM Tickets
+GROUP BY book_ref
+HAVING count(*) > 1; 
+
+
+Найдите все рейсы среди выполненных рейсов, у которых средняя стоимость 
+билетов превышает определенную сумму (например, 500) и округлите результат до 2 знаков.
+
+SELECT  flight_id, ROUND(AVG(amount), 2) AS average_ticket_price
+FROM ticket_flights
+GROUP BY  flight_id
+HAVING ROUND(AVG(amount), 2) > 500
+order by  average_ticket_price; 
+
+
+Найдите аэропорты с наибольшим числом отправляющихся рейсов, оставив только те аэропорты, 
+из которых отправляется более определенного числа рейсов (например, более 100 рейсов).
+
+SELECT   departure_airport, count(*)  AS airport
+FROM Flights
+GROUP BY  departure_airport
+HAVING count(*) > 100
+order by airport desc ; 
+
+
+Найдите среднюю стоимость билетов на все выполненные рейсы.
+
+SELECT AVG(amount) AS  amountt FROM Ticket_flights; 
+
+
+Найдите количество проданных билетов на каждый рейс из таблицы "flights".
+
+SELECT 
+     flight_id,
+    count( ticket_no) AS tickets
+FROM Ticket_flights
+GROUP BY  flight_id
+order by flight_id;
+
+
+Найдите общую стоимость всех бронирований в таблице "bookings".
+
+SELECT SUM(total_amount) AS total_sum FROM bookings;
+
+
+Найдите количество билетов в каждой брони и отобразите только брони с числом билетов больше 2.
+
+SELECT  book_ref, count(*)  AS passenger_count
+FROM Tickets
+GROUP BY  book_ref
+HAVING count(*) > 2;  
